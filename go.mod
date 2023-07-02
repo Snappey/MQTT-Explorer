@@ -1,4 +1,4 @@
-module mqtt-explorer
+module github.com/snappey/mqtt-explorer
 
 go 1.20
 
