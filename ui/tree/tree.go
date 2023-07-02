@@ -6,7 +6,7 @@ import (
     tea "github.com/charmbracelet/bubbletea"
     "github.com/charmbracelet/lipgloss"
     mqtt "github.com/eclipse/paho.mqtt.golang"
-    "mqtt-explorer/internal"
+    "github.com/snappey/mqtt-explorer/internal"
     "net/url"
     "strings"
     "time"

@@ -5,7 +5,7 @@ import (
     tea "github.com/charmbracelet/bubbletea"
     "github.com/charmbracelet/glamour"
     "github.com/charmbracelet/lipgloss"
-    "mqtt-explorer/internal"
+    "github.com/snappey/mqtt-explorer/internal"
     "strings"
 )
 
