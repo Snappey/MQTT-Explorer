@@ -90,14 +90,19 @@ func (m NodeModel) RenderNodes() string {
         if child.Path == m.cursor.SelectedNode.Path {
             sb.WriteString(selectedStyle().Render(fmt.Sprintf("|-> %s (%d messages)", topic, child.GetTotalPayloads())))
             if child.Children.Length() == 0 && len(child.Payloads) > 0 {
-                renderedPayload, _ := r.Render(fmt.Sprintf("```json\n%s\n```", child.Payloads[0]))
+                renderedPayload, _ := r.Render(fmt.Sprintf("```json\n %s \n```", child.Payloads[0]))
                 sb.WriteString(renderedPayload)
+            } else {
+                if drawn < m.height {
+                    sb.WriteRune('\n')
+                }
             }
         } else {
             sb.WriteString(fmt.Sprintf("|- %s (%d messages)", topic, child.GetTotalPayloads()))
+            if drawn < m.height {
+                sb.WriteRune('\n')
+            }
         }
-        sb.WriteRune('\n')
-
         drawn += 1
     }
 
