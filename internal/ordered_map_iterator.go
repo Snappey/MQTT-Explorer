@@ -26,18 +26,30 @@ func (i *OrderedMapIterator[V]) SkipUntil(searchKey string) bool {
     return false
 }
 
-func (i *OrderedMapIterator[V]) Next() bool {
-    i.index += 1
-
+func (i *OrderedMapIterator[V]) HasNext() bool {
     return i.index <= len(i.data.keys)
 }
 
-func (i *OrderedMapIterator[V]) Previous() bool {
-    if i.index > 0 {
-        i.index -= 1
+func (i *OrderedMapIterator[V]) Next() bool {
+    hasNext := i.HasNext()
+    if hasNext {
+        i.index++
     }
 
-    return i.index >= 0
+    return hasNext
+}
+
+func (i *OrderedMapIterator[V]) HasPrevious() bool {
+    return i.index > 0
+}
+
+func (i *OrderedMapIterator[V]) Previous() bool {
+    hasPrev := i.HasPrevious()
+    if hasPrev {
+        i.index--
+    }
+
+    return hasPrev
 }
 
 func (i *OrderedMapIterator[V]) Skip(count int) bool {
