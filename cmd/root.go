@@ -5,7 +5,7 @@ import (
     "fmt"
     tea "github.com/charmbracelet/bubbletea"
     mqtt "github.com/eclipse/paho.mqtt.golang"
-    "github.com/snappey/mqtt-explorer/ui/tree"
+    "github.com/snappey/mqtt-explorer/ui"
     "log"
     "net/url"
     "os"
@@ -44,7 +44,7 @@ var rootCmd = &cobra.Command{
             log.Fatalf("failed to connect to %s... (Server Connection TimedOut)", brokerUrl)
         }
 
-        log.Printf("connected..")
+        log.Printf("connected to %s..", brokerUrl)
 
         messages := make(chan mqtt.Message)
         subToken := client.Subscribe(topic, 0, func(client mqtt.Client, message mqtt.Message) {
@@ -52,7 +52,7 @@ var rootCmd = &cobra.Command{
         })
 
         if !subToken.WaitTimeout(time.Second * 5) {
-            log.Fatalf("failed to connect to ")
+            log.Fatalf("failed to connect to %s timeout exceeded", brokerUrl)
         }
 
         log.Printf("subcribed to %s", topic)
@@ -67,9 +67,11 @@ var rootCmd = &cobra.Command{
             }
         }()
 
-        if _, err := tea.NewProgram(tree.CreateTreeModel(context.TODO(), brokerUrl, []string{topic}, messages), tea.WithAltScreen()).Run(); err != nil {
+        if _, err := tea.NewProgram(ui.CreateTreeModel(context.TODO(), brokerUrl, []string{topic}, messages), tea.WithAltScreen()).Run(); err != nil {
             log.Fatalf("error processing tree model err=%v", err)
         }
+        
+        client.Disconnect(0)
 
         log.Printf("exiting..")
     },
