@@ -1,9 +1,8 @@
-package tree
+package ui
 
 import (
     "fmt"
     tea "github.com/charmbracelet/bubbletea"
-    "github.com/charmbracelet/glamour"
     "github.com/charmbracelet/lipgloss"
     "github.com/snappey/mqtt-explorer/internal"
     "strings"
@@ -23,10 +22,6 @@ var selectedStyle = func() lipgloss.Style {
         Background(lipgloss.Color("#7D56F4"))
 }
 
-var r, _ = glamour.NewTermRenderer(
-    glamour.WithAutoStyle(),
-)
-
 func CreateNodeModel(node *internal.MessageNode) NodeModel {
     return NodeModel{
         node:     node,
@@ -41,6 +36,8 @@ func (m NodeModel) Init() tea.Cmd {
 }
 
 func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
+    var cmds []tea.Cmd
+
     switch msg := msg.(type) {
     case tea.KeyMsg:
         switch msg.String() {
@@ -53,9 +50,13 @@ func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
         case "right":
             m.cursor.Down()
         }
+
+        cmds = append(cmds, func() tea.Msg {
+            return SetSelectedNode{node: m.cursor.SelectedNode}
+        })
     }
 
-    return m, nil
+    return m, tea.Batch(cmds...)
 }
 
 func (m NodeModel) RenderRootNode() string {
@@ -88,21 +89,15 @@ func (m NodeModel) RenderNodes() string {
         }
 
         if child.Path == m.cursor.SelectedNode.Path {
-            sb.WriteString(selectedStyle().Render(fmt.Sprintf("|-> %s (%d messages)", topic, child.GetTotalPayloads())))
-            if child.Children.Length() == 0 && len(child.Payloads) > 0 {
-                renderedPayload, _ := r.Render(fmt.Sprintf("```json\n %s \n```", child.Payloads[0]))
-                sb.WriteString(renderedPayload)
-            } else {
-                if drawn < m.height {
-                    sb.WriteRune('\n')
-                }
-            }
+            sb.WriteString(selectedStyle().Render(fmt.Sprintf("-> %s (%d messages)", topic, child.GetTotalPayloads())))
         } else {
-            sb.WriteString(fmt.Sprintf("|- %s (%d messages)", topic, child.GetTotalPayloads()))
-            if drawn < m.height {
-                sb.WriteRune('\n')
-            }
+            sb.WriteString(fmt.Sprintf("- %s (%d messages)", topic, child.GetTotalPayloads()))
         }
+
+        if drawn < m.height {
+            sb.WriteRune('\n')
+        }
+
         drawn += 1
     }
 
