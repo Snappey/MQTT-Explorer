@@ -3,14 +3,15 @@ package internal
 import "time"
 
 type MessageNode struct {
-    Children   OrderedMap[*MessageNode]
-    Payloads   [][]byte
-    ReceivedAt time.Time
-    Topic      string
-    Segment    string
-    Depth      uint
-    Parent     *MessageNode
-    Path       string
+    Children     OrderedMap[*MessageNode]
+    Payloads     [][]byte
+    ReceivedAt   time.Time
+    MessageCount int
+    Topic        string
+    Segment      string
+    Depth        uint
+    Parent       *MessageNode
+    Path         string
 }
 
 func (n MessageNode) GetAllDescendantsBFS() []MessageNode {
@@ -30,14 +31,6 @@ func (n MessageNode) GetAllDescendants(method TreeSearchMethod) []MessageNode {
     }
 
     return res
-}
-
-func (n MessageNode) GetTotalPayloads() int {
-    total := 0
-    for _, child := range n.GetAllDescendantsBFS() {
-        total += len(child.Payloads)
-    }
-    return total
 }
 
 func (n MessageNode) GetSiblings() []*MessageNode {

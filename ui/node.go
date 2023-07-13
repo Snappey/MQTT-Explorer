@@ -61,7 +61,7 @@ func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
 
 func (m NodeModel) RenderRootNode() string {
     parentTopics := strings.Split(m.cursor.SelectedNode.Topic, "/")
-    return fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), m.node.GetTotalPayloads())
+    return fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), m.node.MessageCount)
 }
 
 func (m NodeModel) RenderNodes() string {
@@ -91,15 +91,15 @@ func (m NodeModel) RenderNodes() string {
         msg := strings.Builder{}
         msg.WriteString(fmt.Sprintf("-> %s ", topic))
 
-        totalPayloads := child.GetTotalPayloads()
+        totalMessages := child.MessageCount
         if child.Children.Length() > 0 {
-            if totalPayloads > 0 {
-                msg.WriteString(fmt.Sprintf("(%d topics, %d messages)", child.Children.Length(), totalPayloads))
+            if totalMessages > 0 {
+                msg.WriteString(fmt.Sprintf("(%d topics, %d messages)", child.Children.Length(), totalMessages))
             } else {
                 msg.WriteString(fmt.Sprintf("(%d topics)", child.Children.Length()))
             }
         } else {
-            if totalPayloads > 0 {
+            if totalMessages > 0 {
                 msg.WriteString(fmt.Sprintf("= %s", child.Payloads[0]))
             }
         }

@@ -34,6 +34,7 @@ func (t *MessageTree) AddMessage(message mqtt.Message) {
 
     var node = t.Root
     for i, segment := range path {
+        node.MessageCount += 1
 
         if _, exists := node.Children.Get(segment); !exists {
             node.Children.Set(segment, &MessageNode{
