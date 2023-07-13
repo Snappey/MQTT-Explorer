@@ -88,10 +88,26 @@ func (m NodeModel) RenderNodes() string {
             break
         }
 
-        if child.Path == m.cursor.SelectedNode.Path {
-            sb.WriteString(selectedStyle().Render(fmt.Sprintf("-> %s (%d messages)", topic, child.GetTotalPayloads())))
+        msg := strings.Builder{}
+        msg.WriteString(fmt.Sprintf("-> %s ", topic))
+
+        totalPayloads := child.GetTotalPayloads()
+        if child.Children.Length() > 0 {
+            if totalPayloads > 0 {
+                msg.WriteString(fmt.Sprintf("(%d topics, %d messages)", child.Children.Length(), totalPayloads))
+            } else {
+                msg.WriteString(fmt.Sprintf("(%d topics)", child.Children.Length()))
+            }
         } else {
-            sb.WriteString(fmt.Sprintf("- %s (%d messages)", topic, child.GetTotalPayloads()))
+            if totalPayloads > 0 {
+                msg.WriteString(fmt.Sprintf("= %s", child.Payloads[0]))
+            }
+        }
+
+        if child.Path == m.cursor.SelectedNode.Path {
+            sb.WriteString(selectedStyle().Render(msg.String()))
+        } else {
+            sb.WriteString(msg.String())
         }
 
         if drawn < m.height {
