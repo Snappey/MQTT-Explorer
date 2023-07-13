@@ -5,9 +5,10 @@ import (
     mqtt "github.com/eclipse/paho.mqtt.golang"
     "github.com/muesli/reflow/indent"
     "strings"
+    "time"
 )
 
-const PayloadHistoryMax = 25
+const PayloadHistoryMax = 5
 
 type MessageTree struct {
     Root *MessageNode
@@ -53,6 +54,8 @@ func (t *MessageTree) AddMessage(message mqtt.Message) {
             if len(child.Payloads) > PayloadHistoryMax {
                 child.Payloads = child.Payloads[1:]
             }
+
+            child.ReceivedAt = time.Now()
 
             node.Children.Set(segment, child)
         } else {

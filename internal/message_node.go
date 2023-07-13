@@ -1,13 +1,16 @@
 package internal
 
+import "time"
+
 type MessageNode struct {
-    Children OrderedMap[*MessageNode]
-    Payloads [][]byte
-    Topic    string
-    Segment  string
-    Depth    uint
-    Parent   *MessageNode
-    Path     string
+    Children   OrderedMap[*MessageNode]
+    Payloads   [][]byte
+    ReceivedAt time.Time
+    Topic      string
+    Segment    string
+    Depth      uint
+    Parent     *MessageNode
+    Path       string
 }
 
 func (n MessageNode) GetAllDescendantsBFS() []MessageNode {
