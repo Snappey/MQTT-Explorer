@@ -17,8 +17,8 @@ type TreeModel struct {
 
     ctx          context.Context
     ready        bool
-    width        int
-    height       int
+    windowWidth  int
+    windowHeight int
     incoming     <-chan mqtt.Message
     messages     internal.MessageTree
     rootNode     NodeModel
@@ -26,12 +26,6 @@ type TreeModel struct {
 }
 
 var (
-    titleStyle = func() lipgloss.Style {
-        b := lipgloss.RoundedBorder()
-        b.Right = "├"
-        return lipgloss.NewStyle().BorderStyle(b).Padding(0, 1)
-    }()
-
     treeStyle = func(width int, height int) lipgloss.Style {
         return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).
             Width(width / 2).
@@ -41,10 +35,15 @@ var (
     }
 
     detailStyle = func(width int, height int) lipgloss.Style {
-        return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).
-            Width(width/2 - 4).
-            Height(height - 2).
-            MaxHeight(height).
+        border := lipgloss.NormalBorder()
+        border.Left = ""
+        border.Right = ""
+
+        return lipgloss.NewStyle().BorderStyle(border).
+            Width(width/2-4).
+            Height(height/2).
+            Padding(0, 2, 0, 2).
+            MaxWidth(width/2 - 2).
             AlignHorizontal(lipgloss.Left)
     }
 )
@@ -106,12 +105,14 @@ func (m TreeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         switch msg.String() {
         case "crtl+c", "q", "esc":
             return m, tea.Quit
+        case "R":
+            return m, tea.ClearScreen
         }
     case TickMsg:
         cmds = append(cmds, m.doTick())
     case tea.WindowSizeMsg:
-        m.height = msg.Height
-        m.width = msg.Width
+        m.windowHeight = msg.Height
+        m.windowWidth = msg.Width
     }
 
     m.selectedNode, cmd = m.selectedNode.Update(msg)
@@ -123,15 +124,11 @@ func (m TreeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     return m, tea.Batch(cmds...)
 }
 
-func (m TreeModel) headerView() string {
-    return titleStyle.Render(fmt.Sprintf("MQTT Explorer (%s)", m.messages.Root.Segment))
-}
-
 func (m TreeModel) View() string {
     return fmt.Sprintf("%s",
         lipgloss.JoinHorizontal(lipgloss.Left,
-            treeStyle(m.width, m.height).Render(m.rootNode.View()),
-            detailStyle(m.width, m.height).Render(m.selectedNode.View()),
+            treeStyle(m.windowWidth, m.windowHeight).Render(m.rootNode.View()),
+            detailStyle(m.windowWidth, m.windowHeight).Render(m.selectedNode.View()),
         ),
     )
 }
