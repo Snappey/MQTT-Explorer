@@ -104,7 +104,7 @@ func (m NodeModel) RenderNodes() string {
         msg := strings.Builder{}
         msg.WriteString(fmt.Sprintf("-> %s %s", topic, child.GetDetailsString()))
 
-        if child.Path == m.cursor.SelectedNode.Path {
+        if child.Topic == m.cursor.SelectedNode.Topic {
             sb.WriteString(selectedStyle().Render(msg.String()))
 
             if child.Children.Length() > 0 {
@@ -126,7 +126,7 @@ func (m NodeModel) RenderNodes() string {
 
                 if iterator.HasNext() {
                     sb.WriteString("   |-> ")
-                    sb.WriteString(selectedTopicStyle().Render(fmt.Sprintf("...%d Hidden Topic(s)", iterator.Remaining())))
+                    sb.WriteString(selectedTopicStyle().Render(fmt.Sprintf("... %d Hidden Topic(s)", iterator.Remaining())))
                 }
             }
         } else {

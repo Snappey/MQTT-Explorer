@@ -67,10 +67,10 @@ var rootCmd = &cobra.Command{
             }
         }()
 
-        if _, err := tea.NewProgram(ui.CreateTreeModel(context.TODO(), brokerUrl, []string{topic}, messages), tea.WithAltScreen()).Run(); err != nil {
+        if _, err := tea.NewProgram(ui.CreateTreeModel(context.TODO(), brokerUrl, []string{topic}, client, messages), tea.WithAltScreen()).Run(); err != nil {
             log.Fatalf("error processing tree model err=%v", err)
         }
-        
+
         client.Disconnect(0)
 
         log.Printf("exiting..")

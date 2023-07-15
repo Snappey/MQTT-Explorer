@@ -15,14 +15,16 @@ type TreeModel struct {
     Url           *url.URL
     Subscriptions []string
 
-    ctx          context.Context
-    ready        bool
-    windowWidth  int
-    windowHeight int
-    incoming     <-chan mqtt.Message
-    messages     internal.MessageTree
-    rootNode     NodeModel
-    selectedNode NodeDetailsModel
+    ctx                 context.Context
+    ready               bool
+    windowWidth         int
+    windowHeight        int
+    incoming            <-chan mqtt.Message
+    mqttClient          mqtt.Client
+    messages            internal.MessageTree
+    rootNode            NodeModel
+    selectedNodeDetails NodeDetailsModel
+    selectedNodePublish NodePublishModel
 }
 
 var (
@@ -41,25 +43,28 @@ var (
 
         return lipgloss.NewStyle().BorderStyle(border).
             Width(width/2-4).
-            Height(height/2).
+            Height(height/2-2).
             Padding(0, 2, 0, 2).
             MaxWidth(width/2 - 2).
+            MaxHeight(height / 2).
             AlignHorizontal(lipgloss.Left)
     }
 )
 
-func CreateTreeModel(ctx context.Context, url *url.URL, subscriptions []string, incomingMessages <-chan mqtt.Message) TreeModel {
+func CreateTreeModel(ctx context.Context, url *url.URL, subscriptions []string, mqttClient mqtt.Client, incomingMessages <-chan mqtt.Message) TreeModel {
     messageTree := internal.CreateMessageTree(url.String())
 
     return TreeModel{
         Url:           url,
         Subscriptions: subscriptions,
 
-        ctx:          ctx,
-        incoming:     incomingMessages,
-        messages:     messageTree,
-        rootNode:     CreateNodeModel(messageTree.Root),
-        selectedNode: CreateNodeDetailsModel(messageTree.Root),
+        ctx:                 ctx,
+        incoming:            incomingMessages,
+        messages:            messageTree,
+        mqttClient:          mqttClient,
+        rootNode:            CreateNodeModel(messageTree.Root),
+        selectedNodeDetails: CreateNodeDetailsModel(messageTree.Root),
+        selectedNodePublish: CreateNodePublishModel(messageTree.Root),
     }
 }
 
@@ -113,9 +118,14 @@ func (m TreeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     case tea.WindowSizeMsg:
         m.windowHeight = msg.Height
         m.windowWidth = msg.Width
+    case PublishMessage:
+        m.mqttClient.Publish(msg.Topic, msg.QoS, msg.Retained, msg.Payload) // TODO: Convert this to tea.Cmd to report back when token has completed (or errored)
     }
 
-    m.selectedNode, cmd = m.selectedNode.Update(msg)
+    m.selectedNodeDetails, cmd = m.selectedNodeDetails.Update(msg)
+    cmds = append(cmds, cmd)
+
+    m.selectedNodePublish, cmd = m.selectedNodePublish.Update(msg)
     cmds = append(cmds, cmd)
 
     m.rootNode, cmd = m.rootNode.Update(msg)
@@ -128,7 +138,10 @@ func (m TreeModel) View() string {
     return fmt.Sprintf("%s",
         lipgloss.JoinHorizontal(lipgloss.Left,
             treeStyle(m.windowWidth, m.windowHeight).Render(m.rootNode.View()),
-            detailStyle(m.windowWidth, m.windowHeight).Render(m.selectedNode.View()),
+            lipgloss.JoinVertical(lipgloss.Center,
+                detailStyle(m.windowWidth, m.windowHeight).Render(m.selectedNodeDetails.View()),
+                detailStyle(m.windowWidth, m.windowHeight).Render(m.selectedNodePublish.View()),
+            ),
         ),
     )
 }
