@@ -22,6 +22,12 @@ var selectedStyle = func() lipgloss.Style {
         Background(lipgloss.Color("#7D56F4"))
 }
 
+var selectedTopicStyle = func() lipgloss.Style {
+    return lipgloss.NewStyle().
+        Italic(true).
+        Foreground(lipgloss.Color("#BABABA"))
+}
+
 func CreateNodeModel(node *internal.MessageNode) NodeModel {
     return NodeModel{
         node:     node,
@@ -60,8 +66,15 @@ func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
 }
 
 func (m NodeModel) RenderRootNode() string {
+    var messageCount int
+    if m.cursor.SelectedNode.Parent == nil {
+        messageCount = m.cursor.SelectedNode.MessageCount
+    } else {
+        messageCount = m.cursor.SelectedNode.Parent.MessageCount
+    }
+
     parentTopics := strings.Split(m.cursor.SelectedNode.Topic, "/")
-    return fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), m.node.MessageCount)
+    return fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), messageCount)
 }
 
 func (m NodeModel) RenderNodes() string {
@@ -89,23 +102,33 @@ func (m NodeModel) RenderNodes() string {
         }
 
         msg := strings.Builder{}
-        msg.WriteString(fmt.Sprintf("-> %s ", topic))
-
-        totalMessages := child.MessageCount
-        if child.Children.Length() > 0 {
-            if totalMessages > 0 {
-                msg.WriteString(fmt.Sprintf("(%d topics, %d messages)", child.Children.Length(), totalMessages))
-            } else {
-                msg.WriteString(fmt.Sprintf("(%d topics)", child.Children.Length()))
-            }
-        } else {
-            if totalMessages > 0 {
-                msg.WriteString(fmt.Sprintf("= %s", child.Payloads[0]))
-            }
-        }
+        msg.WriteString(fmt.Sprintf("-> %s %s", topic, child.GetDetailsString()))
 
         if child.Path == m.cursor.SelectedNode.Path {
             sb.WriteString(selectedStyle().Render(msg.String()))
+
+            if child.Children.Length() > 0 {
+                iterator := child.CreateChildrenIterator()
+
+                sb.WriteRune('\n')
+                for j := 0; j < 3 && iterator.Next(); j++ {
+                    sb.WriteString("   |-> ")
+                    if subtopic, exists := iterator.Value(); exists {
+                        sb.WriteString(selectedTopicStyle().Render(fmt.Sprintf("%s %s", subtopic.Segment, subtopic.GetDetailsString())))
+                    } else {
+                        sb.WriteString("<MISSING NODE>")
+                    }
+
+                    if iterator.HasNext() {
+                        sb.WriteRune('\n')
+                    }
+                }
+
+                if iterator.HasNext() {
+                    sb.WriteString("   |-> ")
+                    sb.WriteString(selectedTopicStyle().Render(fmt.Sprintf("...%d Hidden Topic(s)", iterator.Remaining())))
+                }
+            }
         } else {
             sb.WriteString(msg.String())
         }

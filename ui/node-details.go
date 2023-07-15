@@ -93,21 +93,6 @@ func (m NodeDetailsModel) View() string {
         sb.WriteString(fmt.Sprintf("%s\n", m.node.Topic))
     }
 
-    /*
-       if m.node.Children.Length() > 0 {
-           iterator := m.node.Children.CreateIterator()
-           for iterator.Next() {
-               if subtopic, exists := iterator.Value(); exists {
-                   sb.WriteString(fmt.Sprintf("|-- %s", subtopic.Segment))
-               }
-
-               if iterator.HasNext() {
-                   sb.WriteRune('\n')
-               }
-           }
-       }
-    */
-
     sb.WriteRune('\n')
     sb.WriteString(
         viewportStyle.Render(m.viewport.View()),
@@ -120,7 +105,7 @@ func (m NodeDetailsModel) View() string {
             Width(m.windowWidth - 4).
             Italic(true).
             Render(
-                fmt.Sprintf("Last Message: %s\n", m.node.ReceivedAt.Format(time.Kitchen)),
+                fmt.Sprintf("Last Message: %s\n", m.node.ReceivedAt.Format(time.StampMilli)),
             ),
         )
     }
