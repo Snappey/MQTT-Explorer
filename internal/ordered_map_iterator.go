@@ -128,3 +128,10 @@ func (i *OrderedMapIterator[V]) Set(index int) error {
 
     return nil
 }
+
+func (i *OrderedMapIterator[V]) Remaining() int {
+    if i.index == -1 {
+        return len(i.data.keys)
+    }
+    return (len(i.data.keys) - 1) - i.index
+}
