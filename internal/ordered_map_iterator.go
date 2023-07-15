@@ -27,7 +27,7 @@ func (i *OrderedMapIterator[V]) SkipUntil(searchKey string) bool {
 }
 
 func (i *OrderedMapIterator[V]) HasNext() bool {
-    return i.index <= len(i.data.keys)
+    return i.index < len(i.data.keys)-1
 }
 
 func (i *OrderedMapIterator[V]) Next() bool {
