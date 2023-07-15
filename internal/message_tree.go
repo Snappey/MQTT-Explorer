@@ -57,6 +57,7 @@ func (t *MessageTree) AddMessage(message mqtt.Message) {
             }
 
             child.ReceivedAt = time.Now()
+            child.MessageCount += 1
 
             node.Children.Set(segment, child)
         } else {
