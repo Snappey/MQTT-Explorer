@@ -16,7 +16,6 @@ type MessageNode struct {
     Segment      string
     Depth        uint
     Parent       *MessageNode
-    Path         string
 }
 
 func (n MessageNode) GetAllDescendantsBFS() []MessageNode {

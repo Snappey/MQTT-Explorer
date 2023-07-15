@@ -23,7 +23,6 @@ func CreateMessageTree(rootNode string) MessageTree {
             Children: CreateOrderedMap[*MessageNode](),
             Payloads: [][]byte{},
             Parent:   nil,
-            Path:     "",
         },
     }
 }
@@ -37,14 +36,18 @@ func (t *MessageTree) AddMessage(message mqtt.Message) {
         node.MessageCount += 1
 
         if _, exists := node.Children.Get(segment); !exists {
+            topic := segment
+            if node.Parent != nil {
+                topic = fmt.Sprintf("%s/%s", node.Topic, segment)
+            }
+
             node.Children.Set(segment, &MessageNode{
-                Topic:    fmt.Sprintf("%s/%s", node.Topic, segment),
+                Topic:    topic,
                 Segment:  segment,
                 Depth:    uint(i),
                 Children: CreateOrderedMap[*MessageNode](),
                 Payloads: [][]byte{},
                 Parent:   node,
-                Path:     fmt.Sprintf("%s/%s", node.Path, segment),
             })
         }
 
