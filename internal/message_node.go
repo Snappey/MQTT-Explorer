@@ -1,6 +1,11 @@
 package internal
 
-import "time"
+import (
+    "fmt"
+    "strconv"
+    "strings"
+    "time"
+)
 
 type MessageNode struct {
     Children     OrderedMap[*MessageNode]
@@ -66,4 +71,25 @@ func (n MessageNode) CreateSiblingIterator() OrderedMapIterator[*MessageNode] {
 
 func (n MessageNode) Length() int {
     return n.Children.Length()
+}
+
+func (n MessageNode) GetDetailsString() string {
+    msg := strings.Builder{}
+
+    totalMessages := n.MessageCount
+    if n.Children.Length() > 0 {
+        if totalMessages > 0 {
+            msg.WriteString(fmt.Sprintf("(%d topics, %d messages)", n.Children.Length(), totalMessages))
+        } else {
+            msg.WriteString(fmt.Sprintf("(%d topics)", n.Children.Length()))
+        }
+    } else {
+        if totalMessages > 0 {
+            msg.WriteString(fmt.Sprintf("= %s", strconv.Quote(string(n.Payloads[0]))))
+        } else {
+            msg.WriteString("= <empty>")
+        }
+    }
+
+    return msg.String()
 }
