@@ -15,6 +15,11 @@ type NodeModel struct {
     expanded bool
 }
 
+const (
+    SmallSkipAmount  = 5
+    MediumSkipAmount = 25
+)
+
 var selectedStyle = func() lipgloss.Style {
     return lipgloss.NewStyle().
         Bold(true).
@@ -27,6 +32,12 @@ var selectedTopicStyle = func() lipgloss.Style {
         Blink(true).
         Italic(true).
         Foreground(lipgloss.Color("#777777"))
+}
+
+var rootTopicStyle = func() lipgloss.Style {
+    return lipgloss.NewStyle().
+        PaddingLeft(2).
+        Bold(true)
 }
 
 func CreateNodeModel(node *internal.MessageNode) NodeModel {
@@ -50,8 +61,28 @@ func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
         switch msg.String() {
         case "up":
             m.cursor.Previous()
+        case "shift+up":
+            for i := 0; i < SmallSkipAmount; i++ {
+                m.cursor.Previous()
+            }
+        case "ctrl+shift+up":
+            for i := 0; i < MediumSkipAmount; i++ {
+                m.cursor.Previous()
+            }
         case "down":
             m.cursor.Next()
+        case "shift+down":
+            for i := 0; i < SmallSkipAmount; i++ {
+                m.cursor.Next()
+            }
+        case "ctrl+shift+down":
+            for i := 0; i < MediumSkipAmount; i++ {
+                m.cursor.Next()
+            }
+        case "end":
+            m.cursor.Bottom()
+        case "home":
+            m.cursor.Top()
         case "left":
             m.cursor.Up()
         case "right":
@@ -75,7 +106,9 @@ func (m NodeModel) RenderRootNode() string {
     }
 
     parentTopics := strings.Split(m.cursor.SelectedNode.Topic, "/")
-    return fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), messageCount)
+    return rootTopicStyle().Render(
+        fmt.Sprintf("%s (%d messages)", strings.Join(parentTopics[:len(parentTopics)-1], "/"), messageCount),
+    )
 }
 
 func (m NodeModel) RenderNodes() string {
@@ -113,6 +146,7 @@ func (m NodeModel) RenderNodes() string {
 
                 sb.WriteRune('\n')
                 for j := 0; j < 3 && iterator.Next(); j++ {
+
                     sb.WriteString("   |-> ")
                     if subtopic, exists := iterator.Value(); exists {
                         sb.WriteString(selectedTopicStyle().Render(fmt.Sprintf("%s %s", subtopic.Segment, subtopic.GetDetailsString())))
