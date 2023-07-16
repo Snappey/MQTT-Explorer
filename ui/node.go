@@ -30,9 +30,8 @@ var selectedStyle = func() lipgloss.Style {
 
 var selectedTopicStyle = func() lipgloss.Style {
     return lipgloss.NewStyle().
-        Blink(true).
         Italic(true).
-        Foreground(lipgloss.Color("#777777"))
+        Foreground(lipgloss.Color("#AAAAAA"))
 }
 
 var rootTopicStyle = func() lipgloss.Style {
