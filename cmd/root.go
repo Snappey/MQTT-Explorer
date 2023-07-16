@@ -85,9 +85,9 @@ func Execute() {
 }
 
 func init() {
-    rootCmd.PersistentFlags().StringVar(&scheme, "scheme", "tcp", "protocol to use tcp, ws or ssl (default: tcp) ")
-    rootCmd.PersistentFlags().StringVar(&hostname, "hostname", "test.mosquitto.org", "hostname to connect to (default: test.mosquitto.org)")
-    rootCmd.PersistentFlags().IntVar(&port, "port", 1883, "port to connect on (default: 1883)")
+    rootCmd.PersistentFlags().StringVar(&scheme, "scheme", "tcp", "protocol to use tcp, ssl, ws or wss")
+    rootCmd.PersistentFlags().StringVar(&hostname, "hostname", "test.mosquitto.org", "hostname of the broker")
+    rootCmd.PersistentFlags().IntVar(&port, "port", 1883, "port the broker is running on, typically tcp: 1883, ssl: 8883, ws: 8083 or wss: 8084")
 
-    rootCmd.Flags().StringVar(&topic, "topic", "#", "topic to subscribe to on the broker (default: #)")
+    rootCmd.Flags().StringVar(&topic, "topic", "#", "topic to subscribe to on the broker")
 }
