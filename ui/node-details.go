@@ -26,7 +26,6 @@ func CreateNodeDetailsModel(selectedNode *internal.MessageNode) NodeDetailsModel
 }
 
 var viewportStyle = lipgloss.NewStyle().
-    Blink(true).
     Foreground(lipgloss.Color("#FAFAFA")).
     Border(lipgloss.RoundedBorder()).
     Padding(1, 1, 1, 1)
