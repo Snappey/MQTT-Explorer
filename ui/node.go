@@ -24,8 +24,9 @@ var selectedStyle = func() lipgloss.Style {
 
 var selectedTopicStyle = func() lipgloss.Style {
     return lipgloss.NewStyle().
+        Blink(true).
         Italic(true).
-        Foreground(lipgloss.Color("#BABABA"))
+        Foreground(lipgloss.Color("#777777"))
 }
 
 func CreateNodeModel(node *internal.MessageNode) NodeModel {
