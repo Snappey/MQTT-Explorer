@@ -9,10 +9,11 @@ import (
 )
 
 type NodeModel struct {
-    node     *internal.MessageNode
-    cursor   internal.MessageNodeCursor
-    height   int
-    expanded bool
+    node         *internal.MessageNode
+    cursor       internal.MessageNodeCursor
+    windowHeight int
+    windowWidth  int
+    expanded     bool
 }
 
 const (
@@ -42,10 +43,10 @@ var rootTopicStyle = func() lipgloss.Style {
 
 func CreateNodeModel(node *internal.MessageNode) NodeModel {
     return NodeModel{
-        node:     node,
-        cursor:   node.CreateCursor(),
-        height:   15,
-        expanded: true,
+        node:         node,
+        cursor:       node.CreateCursor(),
+        windowHeight: 15,
+        expanded:     true,
     }
 }
 
@@ -92,6 +93,9 @@ func (m NodeModel) Update(msg tea.Msg) (NodeModel, tea.Cmd) {
         cmds = append(cmds, func() tea.Msg {
             return SetSelectedNode{node: m.cursor.SelectedNode}
         })
+    case tea.WindowSizeMsg:
+        m.windowHeight = msg.Height - 5
+        m.windowWidth = msg.Width
     }
 
     return m, tea.Batch(cmds...)
@@ -131,7 +135,7 @@ func (m NodeModel) RenderNodes() string {
             continue
         }
 
-        if drawn > m.height {
+        if drawn > m.windowHeight {
             break
         }
 
@@ -168,7 +172,7 @@ func (m NodeModel) RenderNodes() string {
             sb.WriteString(msg.String())
         }
 
-        if drawn < m.height {
+        if drawn < m.windowHeight {
             sb.WriteRune('\n')
         }
 
